@@ -1,0 +1,107 @@
+1、跨域session共享
+通过在Controller上加上@CrossOrigin(origins = {"*"},allowCredentials = "true")实现跨域，服务端支持跨域请求
+前端ajax请求，需要加上xhrFields:{withCredentials:true},不同的客户端要支持session共享的问题，也要支持跨域
+
+
+
+2、全局异常404、405等
+因为请求都没有进入Controller，所以无法捕获异常
+ECS 阿里云centos	8核8G内存
+双核4G内存
+rpm安装不需要配置环境变量，生产环境一个虚拟机只能有一个jdk包
+Linux执行MySQL的SQL文件：mysql -uroot -phuluhulu < miaosha.sql
+
+SpringBoot项目需要添加：才能正确的打包
+<plugin>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-maven-plugin</artifactId>
+</plugin>
+SpringBoot打包的思路：除了自己创建的文件外，还会降pom.xml中的依赖以jar的形式进行打包的最终的jar中
+有的打包方式，会把依赖的jar解压出class文件，耦合到最终的jar
+
+外挂配置文件spring.config.additional-location=/usr/local/project/application.properties
+
+jmeter压测
+线程组
+HTTP请求：
+勾选Use KeepAlived，Advanced中的实现一定要选择Java，否则长连接可能不生效，时间就消耗在不断建立连接上面了
+查看结果树
+聚合报告
+一般关注95line和TPS
+
+TPS=并发数/每个并发消耗的时间
+
+top -H
+
+load average: 0.10, 0.05, 0.05
+Threads: 358 total,   1 running, 357 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.2 us,  0.3 sy,  0.0 ni, 99.5 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0
+最近的1分钟，5分钟，15分钟，CPU load的数量，只要小于CPU的核数，CPU就有空闲
+us：用户使用CPU
+sy：系统使用CPU
+用户空间和系统空间
+
+# pstree -p 31282|wc -l
+154
+最多相应154个线程，server端并发线程数上不去
+
+SpringBoot默认配置参数spring-configuraion-metadata.json中
+2.0.4和2.0.5参数默认配置很多
+
+#等待队列长度，当工作线程满了之后，请求进入等待队列，超过之后拒绝
+server.tomcat.accept-count=100
+#最大连接数
+server.tomcat.max-connections=10000
+#最大工作线程数，经验配置，4G8核，设置800
+server.tomcat.max-threads=200
+#最小工作线程数，可以设置100，对于突然增加的请求，系统能够有时间去反映
+server.tomcat.min-spare-threads=10
+#默认情况下，连接超过10000出现拒绝连接
+#默认情况下，触发的请求超过200+100后拒绝处理
+
+SpringBoot中properties中没有关于keepalived相关配置
+定制化内嵌Tomcat开发
+KeepAliveTimeOut：多少ms不相应断开连接
+MaxKeepAliveRequests：多少次请求后KeepAlive断开失效
+
+使用WebServerCustomizer<ConfigurableSerlvetWebServerFactory>定制化内嵌Tomcat配置
+
+发现容量问题
+响应时间变长，TPS上不去
+
+单Web容器上限
+线程数量：4核8G内存单进程调度数800-1000以上后即花费很多时间在线程切换上，拐点800左右
+等待队列长度：入队出队都会消耗CPU，一般设置1000-2000
+
+发现主要消耗在MySQL的进程上面：
+MySQL优化：分库分表、扩容热点数据
+主键查询(聚簇索引，可能命中缓存)：千万级别数据=1-10ms
+唯一索引查询：10-100ms
+非唯一索引查询：100-1000ms
+无索引：百万条数据=1000ms+
+所以我们在表结构设计上：尽可能保证查询都是通过唯一索引，甚至是主键索引
+
+非插入，更新删除操作：同查询
+插入：1W-10W tps(依赖配置优化)
+
+单机达到瓶颈，需要考虑分布式
+Nginx反向代理，实现负载均衡
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
